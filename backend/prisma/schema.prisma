@@ -1,0 +1,93 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Table {
+  id        String   @id @default(uuid())
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[]
+}
+
+model Category {
+  id           String     @id @default(uuid())
+  name         String
+  displayOrder Int        @default(0)
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  menuItems    MenuItem[]
+}
+
+model MenuItem {
+  id           String      @id @default(uuid())
+  name         String
+  price        Decimal     @db.Decimal(10, 2)
+  imageUrl     String?
+  isAvailable  Boolean     @default(true)
+  displayOrder Int         @default(0)
+  categoryId   String
+  category     Category    @relation(fields: [categoryId], references: [id])
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  orderItems   OrderItem[]
+}
+
+model Order {
+  id         String      @id @default(uuid())
+  tableId    String
+  table      Table       @relation(fields: [tableId], references: [id])
+  status     OrderStatus @default(pending)
+  notes      String?
+  orderedAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  orderItems OrderItem[]
+}
+
+model OrderItem {
+  id           String   @id @default(uuid())
+  orderId      String
+  order        Order    @relation(fields: [orderId], references: [id])
+  menuItemId   String
+  menuItem     MenuItem @relation(fields: [menuItemId], references: [id])
+  quantity     Int
+  priceAtOrder Decimal  @db.Decimal(10, 2)
+  notes        String?
+}
+
+enum OrderStatus {
+  pending
+  confirmed
+  served
+  completed
+}
+
+model User {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("admin")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model StoreConfig {
+  id              String   @id @default("default")
+  storeName       String   @default("QR Menu Order")
+  bankId          String   @default("MB") // MB, VCB, ICB, TPB...
+  bankAccountNo   String   @default("0123456789")
+  bankAccountName String   @default("CUA HANG QR MENU")
+  qrImageUrl      String?
+  updatedAt       DateTime @updatedAt
+}
