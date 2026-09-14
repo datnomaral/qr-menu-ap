@@ -103,3 +103,4 @@ npm run dev
 cd "d:\lm mã qr for menu\backend" && npm test
 cd "d:\lm mã qr for menu\frontend" && npm test
 ```
+# qr-menu-ap
